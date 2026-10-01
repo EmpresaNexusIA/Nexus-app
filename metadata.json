@@ -1,0 +1,6 @@
+{
+  "name": "Nexora",
+  "description": "Tu tienda online lista hoy con pedidos directo a tu WhatsApp y 0% comisión.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
