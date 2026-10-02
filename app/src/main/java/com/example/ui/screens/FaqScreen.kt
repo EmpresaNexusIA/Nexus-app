@@ -323,16 +323,10 @@ fun FaqScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Escribinos por WhatsApp y te respondemos de persona a persona al instante.",
+                        text = "Tocá el botón de WhatsApp abajo a la derecha y te respondemos de persona a persona al instante.",
                         color = NexoraOnSurfaceVariant,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    WhatsAppActionButton(
-                        text = "Probar 30 días con mi catálogo",
-                        modifier = Modifier.fillMaxWidth(),
-                        testTag = "faq_screen_cta"
                     )
                 }
             }

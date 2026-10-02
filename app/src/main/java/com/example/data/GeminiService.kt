@@ -37,14 +37,8 @@ object GeminiService {
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
-    private const val SYSTEM_INSTRUCTION = """
-Sos el Asistente Inteligente de Nexora para comerciantes y vendedores de Rosario y Argentina.
-Ayudás a comerciantes reales (kiosqueros, verduleros, pasteleras, rotiserías, tiendas de ropa en Instagram):
-1. A entender cómo funciona su catálogo online y pedidos por WhatsApp con 0% de comisión.
-2. A planificar combos, promociones y mensajes atractivos para sus clientes.
-3. A encontrar proveedores, mayoristas, centros comerciales y zonas clave de Rosario utilizando datos actualizados de Google Maps.
-Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mirá", "escribile"), sin jerga técnica de programación.
-"""
+    private const val SYSTEM_INSTRUCTION =
+        "Sos el asesor de Nexora para comerciantes de Rosario. Respondé en 2 a 4 frases, directo al hueso, en voseo. Una sola idea por respuesta. Sin introducciones, sin resúmenes, sin despedidas. Máximo 50 palabras, salvo que te pidan expresamente más detalle. Si te falta un dato, preguntá UNA sola cosa. Escribí como un mensaje de WhatsApp de un asesor que respeta el tiempo del comerciante."
 
     suspend fun sendMessage(
         history: List<ChatMessage>,
@@ -57,7 +51,6 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
         }
 
         if (apiKey.isBlank() || apiKey == "MY_GEMINI_API_KEY") {
-            // Intelligent local fallback when API key is not configured in secrets
             val localResponse = generateLocalMerchantAdvice(userMessage)
             return@withContext Result.success(
                 ChatMessage(
@@ -73,8 +66,7 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
             val endpoint = "$BASE_URL/$MODEL_NAME:generateContent?key=$apiKey"
 
             val contentsArray = JSONArray()
-            // Add previous conversation turns
-            val recentHistory = history.takeLast(8)
+            val recentHistory = history.takeLast(6)
             for (msg in recentHistory) {
                 val turn = JSONObject().apply {
                     put("role", if (msg.isUser) "user" else "model")
@@ -83,7 +75,6 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
                 contentsArray.put(turn)
             }
 
-            // Add current message
             contentsArray.put(
                 JSONObject().apply {
                     put("role", "user")
@@ -91,15 +82,32 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
                 }
             )
 
+            val lower = userMessage.lowercase()
+            val isExplicitRosarioLocation = lower.contains("dirección") ||
+                lower.contains("direccion") ||
+                lower.contains("dónde queda") ||
+                lower.contains("donde queda") ||
+                lower.contains("zona comercial") ||
+                lower.contains("mercado de productores") ||
+                lower.contains("peatonal") ||
+                lower.contains("pichincha") ||
+                (lower.contains("proveedor") && lower.contains("rosario")) ||
+                (lower.contains("mayorista") && lower.contains("rosario"))
+
             val rootJson = JSONObject().apply {
                 put("contents", contentsArray)
                 put("systemInstruction", JSONObject().apply {
                     put("parts", JSONArray().put(JSONObject().put("text", SYSTEM_INSTRUCTION)))
                 })
-                // Request Google Maps tool grounding
-                put("tools", JSONArray().apply {
-                    put(JSONObject().put("googleMaps", JSONObject()))
+                put("generationConfig", JSONObject().apply {
+                    put("maxOutputTokens", 150)
+                    put("temperature", 0.4)
                 })
+                if (isExplicitRosarioLocation) {
+                    put("tools", JSONArray().apply {
+                        put(JSONObject().put("googleMaps", JSONObject()))
+                    })
+                }
             }
 
             val requestBody = rootJson.toString()
@@ -114,8 +122,7 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
             val responseBody = response.body?.string() ?: ""
 
             if (!response.isSuccessful) {
-                Log.w(TAG, "Gemini call with googleMaps failed (${response.code}), retrying without tool: $responseBody")
-                // Retry without googleMaps tool in case the key doesn't have Maps tool enabled
+                Log.w(TAG, "Gemini call failed (${response.code}), retrying without tools: $responseBody")
                 return@withContext retryWithoutTools(apiKey, contentsArray)
             }
 
@@ -138,7 +145,6 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
                 }
             }
 
-            // Parse grounding metadata if Google Maps data was returned
             val groundingMetadata = firstCandidate?.optJSONObject("groundingMetadata")
             if (groundingMetadata != null) {
                 val searchChunks = groundingMetadata.optJSONArray("groundingChunks")
@@ -156,9 +162,9 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
             }
 
             val resultText = if (replyBuilder.isNotBlank()) {
-                replyBuilder.toString()
+                replyBuilder.toString().trim()
             } else {
-                "¡De una! Te recomiendo organizar tu catálogo con 5 a 10 productos estrella para que tus clientes puedan pedir directo por WhatsApp sin perderse."
+                "Con Nexora armás tu catálogo online en días y recibís los pedidos directo a tu WhatsApp. ¿Qué rubro vendés?"
             }
 
             Result.success(
@@ -191,6 +197,10 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
                 put("systemInstruction", JSONObject().apply {
                     put("parts", JSONArray().put(JSONObject().put("text", SYSTEM_INSTRUCTION)))
                 })
+                put("generationConfig", JSONObject().apply {
+                    put("maxOutputTokens", 150)
+                    put("temperature", 0.4)
+                })
             }
 
             val request = Request.Builder()
@@ -214,7 +224,7 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
                     return Result.success(
                         ChatMessage(
                             id = System.currentTimeMillis().toString(),
-                            text = text,
+                            text = text.trim(),
                             isUser = false
                         )
                     )
@@ -223,7 +233,7 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
             Result.success(
                 ChatMessage(
                     id = System.currentTimeMillis().toString(),
-                    text = "¡Hola! Para tu negocio te sugiero subir tus fotos con buena luz natural y poner el link de Nexora directo en tu bio de Instagram. ¿Qué rubro vendés?",
+                    text = "Subís tus productos con foto y precio, y tus clientes te piden directo al WhatsApp. ¿Qué rubro vendés?",
                     isUser = false
                 )
             )
@@ -231,7 +241,7 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
             Result.success(
                 ChatMessage(
                     id = System.currentTimeMillis().toString(),
-                    text = "¡Excelente consulta! Con Nexora no pagás ninguna comisión por venta y tus pedidos llegan ordenados directo a WhatsApp.",
+                    text = "En Nexora no pagás comisión por venta y tus pedidos llegan ordenados por WhatsApp. ¿Querés probar 30 días?",
                     isUser = false
                 )
             )
@@ -241,40 +251,30 @@ Hablá siempre en español rioplatense cálido con voseo ("poné", "fijate", "mi
     private fun generateLocalMerchantAdvice(userMessage: String): Pair<String, List<MapPlaceInfo>> {
         val lower = userMessage.lowercase()
         return when {
-            lower.contains("rosario") || lower.contains("mapa") || lower.contains("proveedor") || lower.contains("mayorista") || lower.contains("donde") -> {
+            lower.contains("rosario") || lower.contains("mapa") || lower.contains("proveedor") || lower.contains("mayorista") || lower.contains("donde") || lower.contains("dónde") -> {
                 Pair(
-                    "¡Fijate en estas zonas comerciales y centros clave de Rosario para abastecer tu negocio y atraer más clientes locales!\n\n" +
-                    "• **Peatonal Córdoba y Peatonal San Martín**: el corazón comercial de Rosario Centro con mayor tránsito peatonal para retiro y entregas.\n" +
-                    "• **Mercado de Productores de Rosario (27 de Febrero y San Nicolás)**: ideal para abastecimiento mayorista de verdulerías, frutas y almacenes.\n" +
-                    "• **Zona Pichincha (Bv. Oroño y Jujuy)**: polo gastronómico y de cafeterías artesanales para delivery rápido por WhatsApp.",
+                    "Para mayoristas de alimentos tenés el Mercado de Productores en 27 de Febrero y San Nicolás. Para indumentaria y bazar, la Peatonal San Martín concentra gran variedad. ¿Qué rubro puntual buscás abastecer?",
                     listOf(
                         MapPlaceInfo("Mercado de Productores de Rosario", "27 de Febrero y San Nicolás, Rosario", "https://maps.google.com/?q=Mercado+de+Productores+Rosario"),
-                        MapPlaceInfo("Peatonal Córdoba", "Centro de Rosario, Santa Fe", "https://maps.google.com/?q=Peatonal+Cordoba+Rosario"),
-                        MapPlaceInfo("Distrito Pichincha", "Bv. Oroño y Alrededores, Rosario", "https://maps.google.com/?q=Pichincha+Rosario")
+                        MapPlaceInfo("Peatonal San Martín", "Rosario Centro, Santa Fe", "https://maps.google.com/?q=Peatonal+San+Martin+Rosario")
                     )
                 )
             }
-            lower.contains("precio") || lower.contains("comision") || lower.contains("costo") -> {
+            lower.contains("precio") || lower.contains("comision") || lower.contains("comisión") || lower.contains("costo") || lower.contains("cuanto") || lower.contains("cuánto") -> {
                 Pair(
-                    "En Nexora la regla es clara: **0% de comisión por venta, para siempre**.\n\n" +
-                    "Tenés 30 días de prueba gratuita con tu catálogo real cargado por nosotros. Recién cuando ves que te sirve y decidís quedarte, abonás una puesta en marcha única y un mantenimiento mensual accesible en pesos argentinos. ¡El 100% de tu margen de ganancia es tuyo!",
+                    "La comisión por venta es 0% para siempre. Tenés 30 días de prueba gratuita y después una cuota mensual fija en pesos. ¿Querés que armemos tu catálogo de prueba?",
                     emptyList()
                 )
             }
-            lower.contains("como funciona") || lower.contains("empezar") || lower.contains("catalogo") -> {
+            lower.contains("como funciona") || lower.contains("cómo funciona") || lower.contains("empezar") || lower.contains("catalogo") || lower.contains("catálogo") -> {
                 Pair(
-                    "¡Es facilísimo y no tenés que saber nada de computación!\n\n" +
-                    "1. **Nos mandás tus fotos y precios**: por WhatsApp, cuaderno o Excel.\n" +
-                    "2. **Te armamos la tienda online**: lista con tu nombre y link para la bio de Instagram.\n" +
-                    "3. **Tus clientes eligen y te llega el pedido limpio**: con cantidades, total calculado y medio de pago directo a tu WhatsApp.\n\n" +
-                    "¿Querés que armemos el borrador de tu catálogo hoy?",
+                    "Nos mandás fotos y precios por WhatsApp y te armamos la tienda con tu propio link. Tus clientes eligen y te llega el pedido limpio y sumado. ¿Qué productos vendés hoy?",
                     emptyList()
                 )
             }
             else -> {
                 Pair(
-                    "¡Qué buena idea para tu negocio! Con Nexora podés poner tu catálogo en la bio de Instagram y recibir cada pedido con el detalle exacto: productos, cantidades y total listo para cobrar.\n\n" +
-                    "Además, si estás en Rosario o alrededores, te atendemos de forma directa y personalizada. ¿Qué productos vendés hoy?",
+                    "Con Nexora ponés tu link en Instagram y recibís los pedidos ya sumados por WhatsApp, sin pagar comisión. Lo probás 30 días gratis con tu catálogo real. ¿Te armamos la demo?",
                     emptyList()
                 )
             }

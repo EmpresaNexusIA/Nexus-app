@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.R
 import com.example.ui.components.CyberGlassCard
 import com.example.ui.components.CyberGridCanvas
 import com.example.ui.components.HudPillBadge
@@ -77,7 +78,7 @@ data class DemoProduct(
     val name: String,
     val emoji: String,
     val price: Int,
-    val imageUrl: String
+    val imageRes: Int
 )
 
 @Composable
@@ -93,42 +94,42 @@ fun DemoScreen(
                 name = "Pan casero",
                 emoji = "🍞",
                 price = 1200,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuDjRaATjaLl2HfbeDsIl5sMxD4JKfMaa8v6dEzLD4GDNtfRzO6QfVUrb1j5nJSpjZlu975quv2Ig63FxLUiTLEeWKARLT4cAbtw58NVr2HlPfcxilXObOF2kTXb-AwYYYyO9FhBanhwoNgZkYej2OfOka_WhYhjcENLcempwvTcGp5Zx01uwdQOiquC28KJhgzA28Yk1KlQe_QODyf9u2AgkkOmlKT8Fem8E0i8heNYPpOxm9srSkn1"
+                imageRes = R.drawable.img_pan_frances
             ),
             DemoProduct(
                 id = "queso",
                 name = "Queso cremoso",
                 emoji = "🧀",
                 price = 1800,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCi_E0635Hb06qfowo1a9qyKLGFOLt-XpKOcVgKrnKCtv5ck7-JsTRq-JxkBJ0sC1dbJ6uC-nj9wzhj0YrX3Xur_WuwySYFL9KTME0TzgIdiaCMXHwTDkGFHef_jK8UKtUISoYAiJ8qZvwzrijNw8yqG3-YIdB89B5Bx-KlUUR47fuF7o7yUfXJqbZ4BgjKporWAkmqpZUaoiVzFHisatFQtsgPK8fmZ5umfrHqEXeh5AjVTpQQCqBs"
+                imageRes = R.drawable.img_queso
             ),
             DemoProduct(
                 id = "medialunas",
                 name = "Medialunas ×6",
                 emoji = "🥐",
                 price = 1400,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuD5ztt7-G1Z-eovGjW6dBC3jLdQsFtKiaR6QUJxjAmXOx2K-JB1APqA613vrHP-gC6uu_gON5FpfYZwKEKzbIYQCiOlvvgIaM5Z-WOurldSJz_BEP2V110NeXxfZyX45okRU6enHKaoyRbYmkS-Z3bCtvy_TfPCF9P47icfx-yDemq_PtcjMtUP4rFIj71IoRGaEljV-jOBK6kGSbKIdniJHeHBMdOEYkqsuNWGcOgoUTeSIeWO580e"
+                imageRes = R.drawable.img_medialunas
             ),
             DemoProduct(
                 id = "cafe",
                 name = "Café 1/2 kg",
                 emoji = "☕",
                 price = 2900,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCYlYBvqaz2Wk2E4RrUHZSNR00EHzUQ4BVtQ9wHTkfpCje_VGXGgoubCUKmQ8-PyWEcj2RYKfKtWG5E9ZkW4t6itrM3V9GX6StA80TmMB20pi95QhVCHQTOQuE1rjfM_J6wrlnTgNq6Qk6BoQIzEhNsloZclTtfEbsDEki1v2fsWRcNqJJmsm5OoylxHoGeMjH1tB95luSxa_3YaCXYc7nySQxabcNEUU9SPs717DZAh9egEcSpX6j8"
+                imageRes = R.drawable.img_cafe
             ),
             DemoProduct(
                 id = "mermelada",
                 name = "Mermelada casera",
                 emoji = "🍯",
                 price = 1500,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuDjRaATjaLl2HfbeDsIl5sMxD4JKfMaa8v6dEzLD4GDNtfRzO6QfVUrb1j5nJSpjZlu975quv2Ig63FxLUiTLEeWKARLT4cAbtw58NVr2HlPfcxilXObOF2kTXb-AwYYYyO9FhBanhwoNgZkYej2OfOka_WhYhjcENLcempwvTcGp5Zx01uwdQOiquC28KJhgzA28Yk1KlQe_QODyf9u2AgkkOmlKT8Fem8E0i8heNYPpOxm9srSkn1"
+                imageRes = R.drawable.img_mermelada
             ),
             DemoProduct(
                 id = "yerba",
                 name = "Yerba orgánica 1kg",
                 emoji = "🧉",
                 price = 2200,
-                imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCYlYBvqaz2Wk2E4RrUHZSNR00EHzUQ4BVtQ9wHTkfpCje_VGXGgoubCUKmQ8-PyWEcj2RYKfKtWG5E9ZkW4t6itrM3V9GX6StA80TmMB20pi95QhVCHQTOQuE1rjfM_J6wrlnTgNq6Qk6BoQIzEhNsloZclTtfEbsDEki1v2fsWRcNqJJmsm5OoylxHoGeMjH1tB95luSxa_3YaCXYc7nySQxabcNEUU9SPs717DZAh9egEcSpX6j8"
+                imageRes = R.drawable.img_yerba
             )
         )
     }
@@ -226,7 +227,7 @@ fun DemoScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 AsyncImage(
-                                    model = product.imageUrl,
+                                    model = product.imageRes,
                                     contentDescription = product.name,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()

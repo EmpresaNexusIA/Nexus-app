@@ -27,11 +27,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.SendToMobile
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Checkroom
@@ -48,7 +49,6 @@ import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SendToMobile
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Store
@@ -90,10 +90,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.R
 import com.example.ui.components.CyberGlassCard
 import com.example.ui.components.CyberGridCanvas
 import com.example.ui.components.HudPillBadge
 import com.example.ui.components.NexoraLogo
+import com.example.ui.components.ProductGrid
 import com.example.ui.components.WhatsAppActionButton
 import com.example.ui.theme.NexoraCyanNeon
 import com.example.ui.theme.NexoraGoldAccent
@@ -207,32 +209,21 @@ fun LandingScreen(
                         }
                     }
 
-                    // Green WhatsApp Header Button + Avatar
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    // Header Avatar
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF191F2F))
+                            .border(1.dp, NexoraCyanNeon.copy(alpha = 0.4f), CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
-                        WhatsAppActionButton(
-                            text = "PROBAR 30 DÍAS",
-                            minHeight = 36.dp,
-                            testTag = "header_cta_button",
-                            modifier = Modifier.height(36.dp)
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Perfil",
+                            tint = NexoraCyanNeon,
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF191F2F))
-                                .border(1.dp, NexoraCyanNeon.copy(alpha = 0.4f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Perfil",
-                                tint = NexoraCyanNeon,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
                     }
                 }
             }
@@ -439,6 +430,53 @@ fun LandingScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // ==========================================
+            // CATÁLOGO DIGITAL RESPONSIVO (PRODUCT GRID)
+            // ==========================================
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "// VIDRIERA ONLINE EN VIVO",
+                    color = NexoraCyanNeon,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "CATÁLOGO DE PRODUCTOS",
+                    color = NexoraOnSurface,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-0.5).sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Tus productos organizados en una grilla ágil y moderna. Tu cliente elige y pide directo por WhatsApp.",
+                    color = NexoraOnSurfaceVariant,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 360.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ProductGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 480.dp),
+                    minColumnWidth = 156.dp,
+                    gridHeight = 540.dp
+                )
+            }
+
             Spacer(modifier = Modifier.height(36.dp))
 
             // ==========================================
@@ -480,7 +518,7 @@ fun LandingScreen(
                 // 3 Cards: 01, 02, 03
                 StepCard(
                     number = "01",
-                    icon = Icons.Default.Chat,
+                    icon = Icons.AutoMirrored.Filled.Chat,
                     title = "Una charla y tu catálogo",
                     description = "Nos pasás fotos, precios y lo que vendés. Nosotros armamos tu tienda completa sin que toques una sola línea de código."
                 )
@@ -552,7 +590,7 @@ fun LandingScreen(
                         isCyan = true
                     ),
                     FeatureItem(
-                        icon = Icons.Default.Chat,
+                        icon = Icons.AutoMirrored.Filled.Chat,
                         title = "Pedidos perfectos por WhatsApp",
                         desc = "Se termina el \"pasame el precio\" y los mensajes que se pierden entre historias y audios.",
                         isCyan = false
@@ -1133,7 +1171,7 @@ fun LandingScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.SendToMobile,
+                                imageVector = Icons.AutoMirrored.Filled.SendToMobile,
                                 contentDescription = "Enviar",
                                 tint = NexoraCyanNeon,
                                 modifier = Modifier.size(24.dp)
@@ -1493,22 +1531,22 @@ fun DualPhoneHudMockup(
                     ProductItem(
                         name = "Pan casero",
                         price = "$1.200",
-                        imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuDjRaATjaLl2HfbeDsIl5sMxD4JKfMaa8v6dEzLD4GDNtfRzO6QfVUrb1j5nJSpjZlu975quv2Ig63FxLUiTLEeWKARLT4cAbtw58NVr2HlPfcxilXObOF2kTXb-AwYYYyO9FhBanhwoNgZkYej2OfOka_WhYhjcENLcempwvTcGp5Zx01uwdQOiquC28KJhgzA28Yk1KlQe_QODyf9u2AgkkOmlKT8Fem8E0i8heNYPpOxm9srSkn1"
+                        imageRes = R.drawable.img_pan_frances
                     ),
                     ProductItem(
                         name = "Queso cremoso",
                         price = "$1.800",
-                        imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCi_E0635Hb06qfowo1a9qyKLGFOLt-XpKOcVgKrnKCtv5ck7-JsTRq-JxkBJ0sC1dbJ6uC-nj9wzhj0YrX3Xur_WuwySYFL9KTME0TzgIdiaCMXHwTDkGFHef_jK8UKtUISoYAiJ8qZvwzrijNw8yqG3-YIdB89B5Bx-KlUUR47fuF7o7yUfXJqbZ4BgjKporWAkmqpZUaoiVzFHisatFQtsgPK8fmZ5umfrHqEXeh5AjVTpQQCqBs"
+                        imageRes = R.drawable.img_queso
                     ),
                     ProductItem(
                         name = "Medialunas ×6",
                         price = "$1.400",
-                        imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuD5ztt7-G1Z-eovGjW6dBC3jLdQsFtKiaR6QUJxjAmXOx2K-JB1APqA613vrHP-gC6uu_gON5FpfYZwKEKzbIYQCiOlvvgIaM5Z-WOurldSJz_BEP2V110NeXxfZyX45okRU6enHKaoyRbYmkS-Z3bCtvy_TfPCF9P47icfx-yDemq_PtcjMtUP4rFIj71IoRGaEljV-jOBK6kGSbKIdniJHeHBMdOEYkqsuNWGcOgoUTeSIeWO580e"
+                        imageRes = R.drawable.img_medialunas
                     ),
                     ProductItem(
                         name = "Café 1/2 kg",
                         price = "$2.900",
-                        imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCYlYBvqaz2Wk2E4RrUHZSNR00EHzUQ4BVtQ9wHTkfpCje_VGXGgoubCUKmQ8-PyWEcj2RYKfKtWG5E9ZkW4t6itrM3V9GX6StA80TmMB20pi95QhVCHQTOQuE1rjfM_J6wrlnTgNq6Qk6BoQIzEhNsloZclTtfEbsDEki1v2fsWRcNqJJmsm5OoylxHoGeMjH1tB95luSxa_3YaCXYc7nySQxabcNEUU9SPs717DZAh9egEcSpX6j8"
+                        imageRes = R.drawable.img_cafe
                     )
                 )
 
@@ -1772,7 +1810,7 @@ fun ProductMockupCard(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = product.imageUrl,
+                    model = product.imageRes,
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -1979,7 +2017,7 @@ fun ComparisonTable() {
 data class ProductItem(
     val name: String,
     val price: String,
-    val imageUrl: String
+    val imageRes: Int
 )
 
 data class FeatureItem(

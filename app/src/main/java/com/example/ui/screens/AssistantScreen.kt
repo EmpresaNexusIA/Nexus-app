@@ -267,7 +267,7 @@ fun AssistantScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Pensando respuesta con Gemini...",
+                                text = "Pensando...",
                                 color = NexoraCyanNeon,
                                 fontSize = 11.sp,
                                 fontFamily = FontFamily.Monospace

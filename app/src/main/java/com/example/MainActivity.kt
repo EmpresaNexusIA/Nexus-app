@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,11 +21,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.FloatingWhatsAppBotButton
 import com.example.ui.screens.AssistantScreen
 import com.example.ui.screens.DemoScreen
 import com.example.ui.screens.FaqScreen
@@ -62,7 +65,7 @@ enum class AppTab(val title: String, val icon: ImageVector) {
     ASISTENTE("Asistente", Icons.Default.AutoAwesome),
     DEMO("Demo", Icons.Default.ShoppingBag),
     PRECIOS("Precios", Icons.Default.Payments),
-    FAQ("FAQ", Icons.Default.Help)
+    FAQ("FAQ", Icons.AutoMirrored.Filled.Help)
 }
 
 class MainActivity : ComponentActivity() {
@@ -89,7 +92,7 @@ fun MainAppContainer() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = NexoraNavyBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.statusBars,
         bottomBar = {
             NexoraBottomNav(
                 currentTab = currentTab,
@@ -97,16 +100,29 @@ fun MainAppContainer() {
             )
         }
     ) { innerPadding ->
-        when (currentTab) {
-            AppTab.INICIO -> LandingScreen(
-                innerPadding = innerPadding,
-                onNavigateToDemo = { currentTab = AppTab.DEMO },
-                onNavigateToAssistant = { currentTab = AppTab.ASISTENTE }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = innerPadding.calculateTopPadding())
+        ) {
+            val screenPadding = PaddingValues(bottom = 76.dp)
+            when (currentTab) {
+                AppTab.INICIO -> LandingScreen(
+                    innerPadding = screenPadding,
+                    onNavigateToDemo = { currentTab = AppTab.DEMO },
+                    onNavigateToAssistant = { currentTab = AppTab.ASISTENTE }
+                )
+                AppTab.ASISTENTE -> AssistantScreen(innerPadding = screenPadding)
+                AppTab.DEMO -> DemoScreen(innerPadding = screenPadding)
+                AppTab.PRECIOS -> PricingScreen(innerPadding = screenPadding)
+                AppTab.FAQ -> FaqScreen(innerPadding = screenPadding)
+            }
+
+            FloatingWhatsAppBotButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 16.dp)
             )
-            AppTab.ASISTENTE -> AssistantScreen(innerPadding = innerPadding)
-            AppTab.DEMO -> DemoScreen(innerPadding = innerPadding)
-            AppTab.PRECIOS -> PricingScreen(innerPadding = innerPadding)
-            AppTab.FAQ -> FaqScreen(innerPadding = innerPadding)
         }
     }
 }
